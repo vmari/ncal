@@ -101,6 +101,11 @@ function getOAuth2Client(credentials) {
 app.post(
   "/ncal",
   asyncMiddleware(async (req, res) => {
+    if (req.body.text === "egg") {
+      return res.send(
+        `Con este huevo de pascua no te ganas nada, le pagas una birra a <@UGSG76U0N>`
+      );
+    }
     const oAuth2Client = getOAuth2Client(credentials);
 
     if (!tokens.hasOwnProperty(req.body.user_id)) {
@@ -193,7 +198,7 @@ app.post(
         // send confirmation (link to the event)
         if (err) {
           res.send(
-            "Algo salio mal :(\nDecile a <@UMER3B8B1> o tirate un PR en https://github.com/vmari/ncal"
+            "Algo salió mal :(\nDecile a <@UGSG76U0N> o tirate un PR en https://github.com/vmari/ncal"
           );
           return;
         }
