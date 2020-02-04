@@ -106,17 +106,19 @@ app.post(
     if (!tokens.hasOwnProperty(req.body.user_id)) {
       try {
         // assume auth code if user doesn't exist
-        const res = await oAuth2Client.getToken(req.body.text);
-        tokens = storeTokens({ ...tokens, [req.body.user_id]: res.res.data });
+        const r = await oAuth2Client.getToken(req.body.text);
+        tokens = storeTokens({ ...tokens, [req.body.user_id]: r.res.data });
+        return res.send(
+          `Success. Now you can ask for a free room calling \`/ncal\` without arguments.`
+        );
       } catch (e) {
         const authLink = oAuth2Client.generateAuthUrl({
           access_type: "offline",
           scope: SCOPES
         });
-        res.send(
+        return res.send(
           `Please log in and send the token from: <${authLink}|Auth> like this: \`/ncal [token]\`\nAfter this you can ask for a free room calling \`/ncal\` without arguments.`
         );
-        return;
       }
     }
 
@@ -124,8 +126,13 @@ app.post(
 
     const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
 
-    const from = new Date().toISOString();
-    const to = new Date(Date.now() + 3600 * 0.5 * 1000).toISOString();
+    var from = new Date();
+    from.setMinutes(Math.floor(from.getMinutes() / 30) * 30);
+    from.setSeconds(0);
+
+    const to = new Date(from.getTime() + 3600 * 0.5 * 1000).toISOString();
+
+    from = from.toISOString();
 
     // look up for available rooms
     const roomAvailability = await calendar.freebusy.query({
